@@ -6,9 +6,11 @@ import numpy as np
 
 if __name__ == '__main__':
     # Get the environment and extract the number of actions
-    env = gym.make('CartPole-v0')
-    np.random.seed(123)
-    env.seed(123)
+    #env = gym.make('CartPole-v0')
+    #np.random.seed(123)
+    #env.seed(123)
 
-    brain = DeepQNetwork(env)
-    brain.learn()
+    #brain = DeepQNetwork(env)
+    #brain.learn()
+    print ('test')
+    env_UI_demo.mainFunction()
