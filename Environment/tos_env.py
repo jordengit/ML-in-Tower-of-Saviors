@@ -26,7 +26,8 @@ class Tos(object):      # class Tos(tk.TK, object):
         self.element = np.zeros((6, 1), dtype=int)  # record each element number
         self.combo = 0  # total combo
         self.max_combo = 0  # current table can format max combo number
-        self.reward = 0  # total reward
+        self.limit_steps = 60
+        # self.reward = 0  # total reward
         self.build_tos()
 
     def build_tos(self):
@@ -80,6 +81,8 @@ class Tos(object):      # class Tos(tk.TK, object):
         # move
         print('Step.')
         x, y = self.cur_pos[0], self.cur_pos[1]
+        hit_wall = False
+        done = False
         # if action == self.last_action:
         #     print("do not go back.")
         #     return
@@ -87,36 +90,49 @@ class Tos(object):      # class Tos(tk.TK, object):
             if self.cur_pos[0] - 1 >= 0:
                 self.table[x][y], self.table[x - 1][y] = self.swap(self.table[x][y], self.table[x - 1][y])
                 self.cur_pos[0] -= 1
+                self.path.append((self.cur_pos[0], self.cur_pos[1]))
             else:
-                print("over the top edge.")
-                return
+                # print("over the top edge.")
+                hit_wall = True
+
         if action == 1:  # down
             if self.cur_pos[0] + 1 <= self.h - 1:
                 self.table[x][y], self.table[x + 1][y] = self.swap(self.table[x][y], self.table[x + 1][y])
                 self.cur_pos[0] = self.cur_pos[0] + 1
+                self.path.append((self.cur_pos[0], self.cur_pos[1]))
             else:
-                print("over the bot edge.")
-                return
+                # print("over the bot edge.")
+                hit_wall = True
+
         if action == 2:  # left
             if self.cur_pos[1] - 1 >= 0:
                 self.table[x][y], self.table[x][y - 1] = self.swap(self.table[x][y], self.table[x][y - 1])
                 self.cur_pos[1] -= 1
+                self.path.append((self.cur_pos[0], self.cur_pos[1]))
             else:
-                print("over the left edge.")
-                return
+                # print("over the left edge.")
+                hit_wall = True
+
         if action == 3:  # right
             if self.cur_pos[1] + 1 <= self.w - 1:
                 self.table[x][y], self.table[x][y + 1] = self.swap(self.table[x][y], self.table[x][y + 1])
                 self.cur_pos[1] += 1
+                self.path.append((self.cur_pos[0], self.cur_pos[1]))
             else:
-                print("over the right edge.")
-                return
-        if action == 4:  # do nothing
-            print("didn't move.")
-            self.table, self.combo = self.run(self.table)
-            return
+                # print("over the right edge.")
+                hit_wall = True
 
-        self.table, self.combo = self.run(self.table)
+        if action == 4:  # do nothing
+            # print("didn't move.")
+            done = True
+
+        # self.table, self.combo = self.run(self.table)
+        self.combo = self.run(self.table)
+        if self.combo == self.max_combo:
+            done = True
+
+        reward = self.reward_cal(self.combo, len(self.path), hit_wall)
+        return reward, done     # ,status
 
     def render(self):
         print('Render.')
@@ -124,6 +140,14 @@ class Tos(object):      # class Tos(tk.TK, object):
             print(i)
         print("current combo:", self.combo)
         # do something
+
+    def reward_cal(self, combos, steps, hit_wall):
+        reward = combos * 5                 # combo = +5
+        if steps > self.limit_steps:        # >limit_steps =  1:-0.5
+            reward = reward - (steps-self.limit_steps)*0.5
+        if hit_wall:                        # hit wall = -1
+            reward -= 1
+        return reward
 
     def swap(self, a, b):
         tmp = a
@@ -400,11 +424,12 @@ class Tos(object):      # class Tos(tk.TK, object):
 
         print(combo, "\tcombo")
 
-        return table, combo
+        # return table, combo
+        return combo
 
 
 tos = Tos()
 tos.reset()
 tos.render()
-tos.step(4)
+tos.step(3)
 tos.render()
