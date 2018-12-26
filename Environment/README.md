@@ -1,6 +1,6 @@
 # Environment
 
-## action
+## Action
 - ['u', 'd', 'l', 'r', 'e'] up/down/left/right/empty(no move)
 
 ## Reward function
