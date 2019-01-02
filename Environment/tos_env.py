@@ -27,6 +27,7 @@ class Tos(object):      # class Tos(tk.TK, object):
         self.combo = 0  # total combo
         self.max_combo = 0  # current table can format max combo number
         self.limit_steps = 60
+        self.state = None       # format = (cur_x, cur_y, cur_table, action, path)
         # self.reward = 0  # total reward
         self.build_tos()
 
@@ -77,62 +78,60 @@ class Tos(object):      # class Tos(tk.TK, object):
                 self.max_combo = self.max_combo + int(np.floor(self.element[i]/3))
         print("max_combo :", self.max_combo)
 
+        x, y = 0, 0                                                 # if start(0, 0)
+        # x, y = np.random.randint(0, 6), np.random.randint(0, 5)     # if random start
+        self.state = (x, y, self.table, 4, [(x, y)])  # x, y, table, do nothing, path
+
     def step(self, action):
+        state = self.state
         # move
         print('Step.')
-        x, y = self.cur_pos[0], self.cur_pos[1]
+        # x, y = self.cur_pos[0], self.cur_pos[1]
+        x, y, table, last_action, path = state
         hit_wall = False
         done = False
-        # if action == self.last_action:
-        #     print("do not go back.")
-        #     return
-        if action == 0:  # up
-            if self.cur_pos[0] - 1 >= 0:
-                self.table[x][y], self.table[x - 1][y] = self.swap(self.table[x][y], self.table[x - 1][y])
-                self.cur_pos[0] -= 1
-                self.path.append((self.cur_pos[0], self.cur_pos[1]))
+        if action == 0:     # up
+            if x - 1 >= 0:
+                table[x][y], table[x-1][y] = self.swap(table[x][y], table[x-1][y])
+                x -= 1
+                path.append((x, y))
             else:
-                # print("over the top edge.")
                 hit_wall = True
-
-        if action == 1:  # down
-            if self.cur_pos[0] + 1 <= self.h - 1:
-                self.table[x][y], self.table[x + 1][y] = self.swap(self.table[x][y], self.table[x + 1][y])
-                self.cur_pos[0] = self.cur_pos[0] + 1
-                self.path.append((self.cur_pos[0], self.cur_pos[1]))
+        if action == 1:     # down
+            if x + 1 <= self.h - 1:
+                table[x][y], table[x+1][y] = self.swap(table[x][y], table[x+1][y])
+                x += 1
+                path.append((x, y))
             else:
-                # print("over the bot edge.")
                 hit_wall = True
-
-        if action == 2:  # left
-            if self.cur_pos[1] - 1 >= 0:
-                self.table[x][y], self.table[x][y - 1] = self.swap(self.table[x][y], self.table[x][y - 1])
-                self.cur_pos[1] -= 1
-                self.path.append((self.cur_pos[0], self.cur_pos[1]))
+        if action == 2:     # left
+            if y-1 >= 0:
+                table[x][y], table[x][y-1] = self.swap(table[x][y], table[x][y-1])
+                y -= 1
+                path.append((x, y))
             else:
-                # print("over the left edge.")
                 hit_wall = True
-
-        if action == 3:  # right
-            if self.cur_pos[1] + 1 <= self.w - 1:
-                self.table[x][y], self.table[x][y + 1] = self.swap(self.table[x][y], self.table[x][y + 1])
-                self.cur_pos[1] += 1
-                self.path.append((self.cur_pos[0], self.cur_pos[1]))
+        if action == 3:     # right
+            if y+1 <= self.w - 1:
+                table[x][y], table[x][y+1] = self.swap(table[x][y], table[x][y+1])
+                y += 1
+                path.append((x, y))
             else:
-                # print("over the right edge.")
                 hit_wall = True
-
-        if action == 4:  # do nothing
-            # print("didn't move.")
+        if action == 4:     # do nothing
             done = True
 
-        # self.table, self.combo = self.run(self.table)
+        combo = self.run(table)
+        if combo == self.max_combo:
+            done = True
+
         self.combo = self.run(self.table)
         if self.combo == self.max_combo:
             done = True
 
-        reward = self.reward_cal(self.combo, len(self.path), hit_wall)
-        return reward, done     # ,status
+        reward = self.reward_cal(self.combo, len(self.path), hit_wall, action, last_action)
+        self.state = (x, y, table, action, path)
+        return self.state, reward, done, {}
 
     def render(self):
         print('Render.')
@@ -141,11 +140,13 @@ class Tos(object):      # class Tos(tk.TK, object):
         print("current combo:", self.combo)
         # do something
 
-    def reward_cal(self, combos, steps, hit_wall):
+    def reward_cal(self, combos, steps, hit_wall, act, last_act):
         reward = combos * 5                 # combo = +5
         if steps > self.limit_steps:        # >limit_steps =  1:-0.5
-            reward = reward - (steps-self.limit_steps)*0.5
+            reward = reward - steps*0.5
         if hit_wall:                        # hit wall = -1
+            reward -= 1
+        if act == last_act:
             reward -= 1
         return reward
 
@@ -428,8 +429,9 @@ class Tos(object):      # class Tos(tk.TK, object):
         return combo
 
 
-tos = Tos()
-tos.reset()
-tos.render()
-tos.step(3)
-tos.render()
+# tos = Tos()
+# tos.reset()
+# tos.render()
+# tos.step(1)
+# tos.render()
+
