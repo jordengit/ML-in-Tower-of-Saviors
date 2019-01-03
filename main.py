@@ -1,5 +1,6 @@
 #from tos_env import Tos
 from RL_brain import DeepQNetwork
+from tos_env import Tos
 
 import gym
 import numpy as np
@@ -10,7 +11,7 @@ if __name__ == '__main__':
     #np.random.seed(123)
     #env.seed(123)
 
-    #brain = DeepQNetwork(env)
-    #brain.learn()
-    print ('test')
-    env_UI_demo.mainFunction()
+    env = Tos()
+    #env.reset()
+    brain = DeepQNetwork(env)
+    brain.learn()
