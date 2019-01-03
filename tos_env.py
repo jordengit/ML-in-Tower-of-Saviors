@@ -13,7 +13,6 @@ class Tos(object):      # class Tos(tk.TK, object):
         self.debugMode = False
         self.w, self.h = 5, 6
         self.action_space = ['u', 'd', 'l', 'r', 'e']  # up:0, down:1, left:2, right:3, empty:4(do nothing)
-
         # Edited by PinHan
         # our state = [x, y, table, last_action]
         self.state_size = 6 * 5
@@ -29,6 +28,10 @@ class Tos(object):      # class Tos(tk.TK, object):
         self.limit_steps = 60
         self.state = None       # format = (cur_x, cur_y, cur_table, action, path)
         self.reward = 0  # total reward
+
+        # Edited by PinHan
+        self.viewer = None
+
         self.build_tos()
 
     def build_tos(self):
@@ -129,6 +132,7 @@ class Tos(object):      # class Tos(tk.TK, object):
         if action == 4:     # do nothing
             done = True
 
+
         combo = self.run(table)
         if combo == self.max_combo:
             done = True
@@ -139,6 +143,7 @@ class Tos(object):      # class Tos(tk.TK, object):
 
         reward = self.reward + self.reward_cal(self.combo, self.last_combo, len(self.path), hit_wall, action, last_action)
         self.state = (x, y, table, action, path)
+        self.table = table
         self.path = path
         self.last_action = action
         self.last_combo = self.combo
@@ -148,13 +153,21 @@ class Tos(object):      # class Tos(tk.TK, object):
         return observation, reward, done, {}
 
     def render(self, mode='human'):
-        print('Render.')
-        #for i in self.table:
-        #    print(i)
-        print('last action : ', self.last_action)
-        print('current path : ', self.path)
-        print("current combo:", self.combo)
-        # do something
+        screen_width = 600
+        screen_height = 400
+
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(screen_width, screen_height)
+
+        if self.state is None: return None
+
+        return self.viewer.render(return_rgb_array = mode=='rgb_array')
+
+    def close(self):
+        if self.viewer:
+            self.viewer.close()
+            self.viewer = None
 
     def reward_cal(self, combos, last_combos, steps, hit_wall, act, last_act):
         reward = (combos - last_combos) * 5                 # combo = +5
@@ -164,6 +177,8 @@ class Tos(object):      # class Tos(tk.TK, object):
             reward -= 1
         if act == last_act:
             reward -= 1
+        elif act != 4:
+            reward += 0.1
         return reward
 
     def swap(self, a, b):
@@ -443,10 +458,3 @@ class Tos(object):      # class Tos(tk.TK, object):
 
         # return table, combo
         return combo
-
-
-# tos = Tos()
-# tos.reset()
-# tos.render()
-# tos.step(1)
-# tos.render()
