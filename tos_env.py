@@ -20,10 +20,11 @@ class Tos(object):      # class Tos(tk.TK, object):
 
         self.n_actions = len(self.action_space)  # num of actions
         self.last_action = 4  # init = empty
-        self.cur_pos = [0, 0]  # init position = (0, 0)
+        # self.cur_pos = [0, 0]  # init position = (0, 0)
         self.path = []  # record path
         self.element = np.zeros((6, 1), dtype=int)  # record each element number
         self.combo = 0  # total combo
+        self.last_combo = 0     # last combo
         self.max_combo = 0  # current table can format max combo number
         self.limit_steps = 60
         self.state = None       # format = (cur_x, cur_y, cur_table, action, path)
@@ -76,13 +77,17 @@ class Tos(object):      # class Tos(tk.TK, object):
                 self.max_combo += 4
             else:
                 self.max_combo = self.max_combo + int(np.floor(self.element[i]/3))
-        print("max_combo :", self.max_combo)
+        # print("max_combo :", self.max_combo)
 
-        x, y = 0, 0                                                 # if start(0, 0)
+        self.last_action = 4
+        self.path = []
+        self.combo = 0
+        self.last_combo = 0
+        self.reward = 0
+        x, y = 0, 0  # if start(0, 0)
         # x, y = np.random.randint(0, 6), np.random.randint(0, 5)     # if random start
         self.state = (x, y, self.table, 4, [(x, y)])  # x, y, table, do nothing, path
         observation = np.array(self.table).flatten()
-
         return observation
 
     def step(self, action):
@@ -132,11 +137,13 @@ class Tos(object):      # class Tos(tk.TK, object):
         if self.combo == self.max_combo:
             done = True
 
-        reward = self.reward_cal(self.combo, len(self.path), hit_wall, action, last_action)
+        reward = self.reward + self.reward_cal(self.combo, self.last_combo, len(self.path), hit_wall, action, last_action)
         self.state = (x, y, table, action, path)
         self.path = path
         self.last_action = action
-        #self.state = np.array(table)
+        self.last_combo = self.combo
+        self.reward = reward
+        # self.state = np.array(table)
         observation = (np.array(table)).flatten()
         return observation, reward, done, {}
 
@@ -144,13 +151,13 @@ class Tos(object):      # class Tos(tk.TK, object):
         print('Render.')
         #for i in self.table:
         #    print(i)
-        print ('last action : ', self.last_action)
-        print ('current path : ', self.path)
+        print('last action : ', self.last_action)
+        print('current path : ', self.path)
         print("current combo:", self.combo)
         # do something
 
-    def reward_cal(self, combos, steps, hit_wall, act, last_act):
-        reward = combos * 5                 # combo = +5
+    def reward_cal(self, combos, last_combos, steps, hit_wall, act, last_act):
+        reward = (combos - last_combos) * 5                 # combo = +5
         if steps > self.limit_steps:        # >limit_steps =  1:-0.5
             reward = reward - steps * 0.5
         if hit_wall:                        # hit wall = -1
