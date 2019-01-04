@@ -21,7 +21,7 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
         self.last_action = None  # init = empty
         # self.cur_pos = [0, 0]  # init position = (0, 0)
         self.path = None # record path
-        self.element = np.zeros((6, 1), dtype=int)  # record each element number
+        self.element = None  # record each element number
         self.combo = None # total combo
         self.last_combo = None     # last combo
         self.max_combo = 0  # current table can format max combo number
@@ -72,7 +72,7 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
                       [1, 1, 2, 5, 1],
                       [1, 2, 5, 1, 0]]
 
-
+		self.element = np.zeros((6, 1), dtype=int)
         for i in range(self.h):
             for j in range(self.w):
                 self.element[self.table[i][j]] += 1
