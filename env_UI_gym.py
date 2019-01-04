@@ -18,17 +18,17 @@ class env_window:
 		self.paths.append(".\\Img\\light.png")
 	def updateWindow(self,map):
 		self.viewer.geoms=[]
-		for y in range(len(map)):
-			for x in range(len(map[y])):
-				Img = rendering.Image(self.paths[map[y][x]],50,50)
-				Img.add_attr(rendering.Transform(translation=(25+x*self.STONE_WIDTH,25+(4-y)*self.STONE_HEIGHT)))
+		for x in range(len(map)): # max_x == 5
+			for y in range(len(map[x])): # max_y == 6
+				Img = rendering.Image(self.paths[map[x][y]],50,50)
+				Img.add_attr(rendering.Transform(translation=(25+x*self.STONE_WIDTH,25+y*self.STONE_HEIGHT)))
 				Img.set_color(1.,1.,1.)
 				self.viewer.add_geom(Img)
 		self.viewer.render()
 	def runing(self):
 		return self.viewer.isopen
 
-window = env_window()
+#window = env_window()
 #print(window.runing())
 #window.updateWindow([[2,3,4],[5,5,4],[1,1,1,0,0,0]])
 '''start_time = time.time()
