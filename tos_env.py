@@ -72,7 +72,7 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
                       [1, 1, 2, 5, 1],
                       [1, 2, 5, 1, 0]]
 
-		self.element = np.zeros((6, 1), dtype=int)
+        self.element = np.zeros((6, 1), dtype=int)
         for i in range(self.h):
             for j in range(self.w):
                 self.element[self.table[i][j]] += 1
