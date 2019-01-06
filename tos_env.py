@@ -3,18 +3,17 @@ import time
 import sys
 import copy
 import gym
+import time
 from gym import spaces, logger
 from gym.utils import seeding
 from env_UI_gym import env_window
 
-class Tos(gym.Env):      # class Tos(tk.TK, object):
-    def __init__(self):
+class Tos(gym.Env):
+    def __init__(self, initial_table):
         print('Initialize the environment.')
         self.debugMode = False
         self.w, self.h = 5, 6
         self.action_space = spaces.Discrete(4)  # up:1, down:-1, left:2, right:-2, empty:3(do nothing)
-        # Edited by PinHan
-        # our state = [x, y, table, last_action]
         self.state_size = 5 * 6
 
         self.n_actions = 4  # num of actions
@@ -29,48 +28,15 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
         self.state = None       # format = (cur_x, cur_y, cur_table, action, path)
         self.reward = None# total reward
 
-        # Edited by PinHan
+        # UI
         self.window = env_window()
 
-        self.build_tos()
-
-    def build_tos(self):
-        # build table
-        print('Build tos.')
-        self.table = [[0 for x in range(self.w)] for y in range(self.h)]
+        self.table = initial_table
         self.observation_space = np.array(self.table)
 
     def reset(self):
         # reset the table (random or select case) and calculate max combo
         print('Reset.')
-        # random
-        # for i in range(self.h):
-        #     for j in range(self.w):
-        #         self.table[i][j] = np.random.randint(0, 6)
-        # ============================================================
-        # case 1    4c
-        # self.table = [[2, 2, 1, 2, 2],
-        #               [0, 5, 1, 2, 2],
-        #               [5, 5, 1, 2, 5],
-        #               [0, 0, 1, 2, 1],
-        #               [0, 0, 1, 3, 5],
-        #               [1, 1, 1, 1, 1]]
-        # ============================================================
-        # case 2
-        # self.table = [[3, 3, 3, 2, 1],
-        #               [3, 1, 3, 3, 3],
-        #               [3, 5, 1, 5, 5],
-        #               [2, 2, 1, 1, 4],
-        #               [2, 1, 1, 1, 4],
-        #               [2, 2, 2, 1, 4]]
-        # ============================================================
-        # case 3    10
-        self.table = [[5, 4, 3, 2, 1],
-                      [4, 3, 2, 1, 0],
-                      [5, 4, 3, 2, 1],
-                      [5, 2, 5, 1, 0],
-                      [1, 1, 2, 5, 1],
-                      [1, 2, 5, 1, 0]]
 
         self.element = np.zeros((6, 1), dtype=int)
         for i in range(self.h):
@@ -89,7 +55,6 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
                 self.max_combo += 4
             else:
                 self.max_combo = self.max_combo + int(np.floor(self.element[i]/3))
-        # print("max_combo :", self.max_combo)
 
         self.last_action = None
         self.path = []
@@ -100,9 +65,6 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
         # x, y = np.random.randint(0, 6), np.random.randint(0, 5)     # if random start
         self.state = (x, y, self.table, -1, [(x, y)])  # x, y, table, do nothing, path
         observation = np.array(self.table).flatten()
-
-        #self.window = env_window()
-        #self.window.updateWindow(self.table)
 
         return observation
 
@@ -175,18 +137,23 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
         self.last_action = action
         self.last_combo = self.combo
         self.reward = reward
-        # self.state = np.array(table)
         observation = (np.array(table)).flatten()
+
+        # Edited by PinHan
+        print ('Current combos = %d' % combo)
+
+        #time.sleep(0.5)
+
         return observation, reward, done, {}
 
     def render(self, mode='human'):
-        self.window.updateWindow(self.table)
+        self.window.updateWindow(self.table, self.combo)
     def close(self):
         if self.window.viewer:
             self.window.viewer.close()
             self.window.viewer = None
     def action_encoding(self, action):
-        encoding_table = [1, -1, 2, -2, 3]
+        encoding_table = [1, -1, 2, -2]
         return encoding_table[action]
 
     def reward_cal(self, combos, last_combos, steps, hit_wall, act, last_act):
@@ -464,22 +431,4 @@ class Tos(gym.Env):      # class Tos(tk.TK, object):
             table = OrganizeTable(table.copy())
             tmpTable = [[0 for x in range(w)] for y in range(h)]
 
-            # print('loop =============================================\=============================================')
-        # print('\nOrgTable')
-        # for i in range(0, h):
-        #     print(table[i])
-        # print()
-        #
-        # print('Organize table')
-        # for row in table:
-        #     tmpL = []
-        #     for iteam in row:
-        #         if iteam < 100:
-        #             tmpL.append(iteam)
-        #     print(tmpL)
-        # print()
-
-        # print(combo, "\tcombo")
-
-        # return table, combo
         return combo
