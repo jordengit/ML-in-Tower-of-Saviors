@@ -31,13 +31,16 @@ class Tos(gym.Env):
         # UI
         self.window = env_window()
 
-        self.table = initial_table
+        self.table = None
+        self.initial_table = initial_table
         self.observation_space = np.array(self.table)
 
     def reset(self):
         # reset the table (random or select case) and calculate max combo
         print('Reset.')
 
+        self.table = copy.deepcopy(self.initial_table)
+        
         self.element = np.zeros((6, 1), dtype=int)
         for i in range(self.h):
             for j in range(self.w):

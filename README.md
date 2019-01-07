@@ -6,6 +6,6 @@ Python 3.6.6
 - keras/keras-rl
 - gym
 ## Usage
-<p>python3 main.py -map [map index]</p>
+<pr>python3 main.py -map [map index]</pr>
 - 0: random map
 - 1: U map
