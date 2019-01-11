@@ -20,5 +20,5 @@ if __name__ == '__main__':
 
     # build the neural network
     brain = DeepQNetwork(env)
-    brain.learn()
-    #brain.run_test('Weights//map_1_weights.h5f')
+    #brain.learn()
+    brain.run_test('Weights//second_version_weights.h5f')

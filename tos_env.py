@@ -40,7 +40,7 @@ class Tos(gym.Env):
         print('Reset.')
 
         self.table = copy.deepcopy(self.initial_table)
-        
+
         self.element = np.zeros((6, 1), dtype=int)
         for i in range(self.h):
             for j in range(self.w):
@@ -121,6 +121,10 @@ class Tos(gym.Env):
         combo = self.run(table)
         if combo == self.max_combo:
             done = True
+            print('if combo == self.max_combo:')
+            print('if combo == self.max_combo:')
+            print('if combo == self.max_combo:')
+
 
         self.combo = self.run(self.table)
         if self.combo == self.max_combo:
@@ -145,7 +149,7 @@ class Tos(gym.Env):
         # Edited by PinHan
         print ('Current combos = %d' % combo)
 
-        #time.sleep(0.5)
+        time.sleep(0.5)
 
         return observation, reward, done, {}
 

@@ -16,4 +16,15 @@ map = [ [5, 4, 3, 2, 1],
 maps.append(map)
 
 # map_2
+map = [ [9, 9, 3, 2, 1],
+        [9, 3, 2, 1, 9],
+        [9, 9, 3, 2, 1],
+        [9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9] ]
+for row in map:
+    for i in range(len(row)):
+        if row[i] == 9:
+            row[i] = np.random.randint(6)
+maps.append(map)
 # map_3
